@@ -1,4 +1,5 @@
 #include "Primitive.h"
+#include <time.h>
 
 /*
 *	Author: Frederic Garnier.
@@ -17,26 +18,18 @@
 *
 *
 *	BUGS:
-*	Not enough features implemented to notice bugs, everything works as intended so far.
+*	A bug can occur while drawing a line, such that the line will not go from the start of the monitor to the end. More than one triangle and more than one
+*	line is not supported at the moment, and can cause undefined results.
 */
 int32_t GL::nWindowHeight = 256;
 int32_t GL::nWindowWidth = 256;
 uint32_t GL::nSize = GL::nWindowWidth * GL::nWindowHeight;
 float* GL::pFrameBuffer;
 uint32_t GL::nOldSize = GL::nSize;
+EPolygonMode GL::PolygonMode = EPolygonMode::EPolygon_Filled;
 
-/*@note: Draws at location (x,y) with specified colour (pColor) at framebuffer (pFrameBuffer)
-@param x: X coordinate where to draw the pixel
-@param y: Y coordinate where to draw the pixel
-@param pColor: Colour to be used
-@param pFrameBuffer: Framebuffer where the pixel will be drawn*/
-void Draw(int32_t x, int32_t y, GL::SRGB& pColor, float* pFrameBuffer)
-{
-	assert(pFrameBuffer);
-	pFrameBuffer[3 * (y * GL::nWindowWidth + x) + 0] = pColor.r;
-	pFrameBuffer[3 * (y * GL::nWindowWidth + x) + 1] = pColor.g;
-	pFrameBuffer[3 * (y * GL::nWindowWidth + x) + 2] = pColor.b;
-}
+
+Buffer VertexBuffer = Buffer(3);
 
 /*@note: Draws a procedural checkerboard for debugging purposes*/
 void debugCheckerBoard()
@@ -54,7 +47,6 @@ void debugCheckerBoard()
 	}
 }
 
-
 /*@note: Main loop, this is where any drawing is to be done
 @todo: Allocate pFrameBuffer initially once, and only reallocate when window is resized, allocating and deallocating like so, ought to be very very slow.*/
 void Render()
@@ -62,7 +54,7 @@ void Render()
 	// Adjust array size as window is resized
 	GL::nSize = GL::nWindowWidth * GL::nWindowHeight;
 	GL::pFrameBuffer = new float[GL::nSize * 3];
-	DrawPrimitive(MVector4(0, 0, 0, 0), MVector4(256, GL::nWindowHeight, 0, 0), GL::SRGB(1, 0, 0), EPrimitive::EPrimitive_Type_Line);
+	DrawPrimitive(VertexBuffer, GL::SRGB(1, 1, 0), EPrimitive::EPrimitive_Type_Triangle);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDrawPixels(GL::nWindowWidth, GL::nWindowHeight, GL_RGB, GL_FLOAT, GL::pFrameBuffer);
 	glutSwapBuffers();
@@ -80,6 +72,13 @@ void OnReshape(int32_t nWidth, int32_t nHeight)
 	GL::nWindowWidth = nWidth;
 }
 
+void InitBuffer()
+{
+	VertexBuffer.SetAttribute(20, 20, 0, 0, 0);
+	VertexBuffer.SetAttribute(GL::nWindowHeight - 1, GL::nWindowHeight - 1, 0, 0, 1);
+	VertexBuffer.SetAttribute(GL::nWindowHeight - 1, 20, 0, 0, 2);
+}
+
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
@@ -87,6 +86,7 @@ int main(int argc, char** argv)
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 	glutInitWindowSize(GL::nWindowWidth, GL::nWindowHeight);
 	glutCreateWindow("Frederic Garnier - Software rendering");
+	InitBuffer();
 	glutDisplayFunc(Render);
 	glutReshapeFunc(OnReshape);
 	glEnable(GL_DEPTH_TEST);
