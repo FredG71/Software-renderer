@@ -19,3 +19,16 @@ void SetPolygonMode(EPolygonMode PolygonMode)
 {
 	GL::PolygonMode = PolygonMode;
 }
+
+/*@note: Transforms normalized device coordinates to screen coordinates, does not take depth into account at the moment!
+@param x: X coordinate of the viewport rectangle
+@param y: Y coordinate of the viewport rectangle
+@param nWidth: Viewport width
+@param nHeight: Viewport height
+@param NDCCoordinates: Normalized device coordinates to be transformed to screen coordinates*/
+void ViewportTransform(int32_t x, int32_t y, int32_t nWidth, int32_t nHeight, MVector4& NDCCoordinates)
+{
+	GL::ScreenCoordinates.x = (nWidth >> 1)		*	NDCCoordinates.x + (x + (nWidth >> 1));
+	GL::ScreenCoordinates.y = (nHeight >> 1)	*	NDCCoordinates.y + (y + (nHeight >> 1));
+	printf("Screen coords: %f, %f\n", GL::ScreenCoordinates.x, GL::ScreenCoordinates.y);
+}

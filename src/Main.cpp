@@ -5,10 +5,10 @@
 *	Author: Frederic Garnier.
 *	Language: C++
 *	Created: 9/10/2014
-*	Modified: 10/10/2014
+*	Modified: 11/10/2014
 *
 *
-*	Currently supports drawing lines, among other things see debugCheckerBoard(), no support for linear interlation, matrices, 2 dimensional vectors
+*	Currently supports drawing lines, among other things see debugCheckerBoard(), no support for linear interlation, 2 dimensional vectors
 *	3 dimensional vectors etc, this should work on other platforms, however it hasn't been tested
 *	
 *	Libraries: OpenGL, Freeglut.
@@ -18,16 +18,16 @@
 *
 *
 *	BUGS:
-*	A bug can occur while drawing a line, such that the line will not go from the start of the monitor to the end. More than one triangle and more than one
-*	line is not supported at the moment, and can cause undefined results.
+*	Rotation around the Z axis can cause issues, which will be resolved when going to 3D, stretching the window can cause a crash, due to going out of the
+*	framebuffer's bounds etc.s
 */
-int32_t GL::nWindowHeight = 256;
-int32_t GL::nWindowWidth = 256;
+int32_t GL::nWindowHeight = 512;
+int32_t GL::nWindowWidth = 512;
 uint32_t GL::nSize = GL::nWindowWidth * GL::nWindowHeight;
 float* GL::pFrameBuffer;
 uint32_t GL::nOldSize = GL::nSize;
 EPolygonMode GL::PolygonMode = EPolygonMode::EPolygon_Filled;
-
+MVector4 GL::ScreenCoordinates = MVector4(0);
 
 Buffer VertexBuffer = Buffer(3);
 
@@ -74,9 +74,16 @@ void OnReshape(int32_t nWidth, int32_t nHeight)
 
 void InitBuffer()
 {
-	VertexBuffer.SetAttribute(20, 20, 0, 0, 0);
-	VertexBuffer.SetAttribute(GL::nWindowHeight - 1, GL::nWindowHeight - 1, 0, 0, 1);
-	VertexBuffer.SetAttribute(GL::nWindowHeight - 1, 20, 0, 0, 2);
+	VertexBuffer.SetAttribute(-1, -1, 0, 0, 0);
+	VertexBuffer.SetAttribute(0, 1, 0, 0, 1);
+	VertexBuffer.SetAttribute(1, -1, 0, 0, 2);
+	MMatrix4x4 pScaleMatrix = ScaleMatrix(pScaleMatrix, 0.5, 0.5, 0.5);
+	MMatrix4x4 pRotationMatrix = RotationMatrixY(pRotationMatrix, 1.1);
+	MMatrix4x4 MatrixProduct = pScaleMatrix * pRotationMatrix;
+	for (int nIndex = 0; nIndex < VertexBuffer.nNumVectors; nIndex++)
+	{
+		VertexBuffer.pBufferAttribute[nIndex] = VertexBuffer.pBufferAttribute[nIndex] * MatrixProduct;
+	}
 }
 
 int main(int argc, char** argv)

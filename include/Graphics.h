@@ -7,6 +7,7 @@
 #include <float.h>
 #include <cstdio>
 #include <cassert>
+#include "Math.h"
 
 enum class EPolygonMode{
 	// Draws in wireframe mode, i.e. no rasterization occurs.
@@ -28,6 +29,8 @@ namespace GL{
 	extern uint32_t nOldSize;
 	// Polygon mode - either wireframe or filled
 	extern EPolygonMode PolygonMode;
+	// Screen coordinates transformed from NDC space - see ::ViewportTransform
+	extern MVector4 ScreenCoordinates;
 	/* Colour in RGB colour space, where r is Red, g is Green, b is Blue - S is a prefix*/
 	struct SRGB{
 		float r;
@@ -46,3 +49,4 @@ namespace GL{
 void Draw(int32_t x, int32_t y, GL::SRGB& pColor, float* pFrameBuffer);
 void Render();
 void SetPolygonMode(EPolygonMode PolygonMode);
+void ViewportTransform(int32_t x, int32_t y, int32_t nWidth, int32_t nHeight, MVector4& NDC);
