@@ -36,12 +36,10 @@ struct Buffer{
 		// Ensure we're not writing past the framebuffer!
 		assert(	x < GL::nWindowHeight && x < GL::nWindowWidth &&
 				y < GL::nWindowHeight && y < GL::nWindowWidth);
-
-		ViewportTransform(0, 0, GL::nWindowWidth, GL::nWindowHeight, MVector4(x, y, 0, 0));
-		pBufferAttribute[nIndex].x = GL::ScreenCoordinates.x;
-		pBufferAttribute[nIndex].y = GL::ScreenCoordinates.y;
-		pBufferAttribute[nIndex].z = 0;
-		pBufferAttribute[nIndex].w = 0;
+		pBufferAttribute[nIndex].x = x;
+		pBufferAttribute[nIndex].y = y;
+		pBufferAttribute[nIndex].z = z;
+		pBufferAttribute[nIndex].w = w;
 	}
 
 	~Buffer()

@@ -1,3 +1,4 @@
+#include <time.h>
 #include "Primitive.h"
 
 /*@note: Draws a line using the differential digital analyzer line algorithm
@@ -37,6 +38,11 @@ void DDALine(
 	}
 }
 
+GL::SRGB Lerp(GL::SRGB& A, GL::SRGB& B, float t)
+{
+	return Math::Lerp<GL::SRGB>(A, B, t );
+}
+
 /*@note: Rasterizes a triangle with input vectors A, B, C and colour pColour
 @param A: Coordinate of one of the point of the triangle
 @param B: Coordinate of one of the point of the triangle
@@ -51,7 +57,7 @@ void Rasterize(const MVector4& A, const MVector4& B, const MVector4& C, GL::SRGB
 	float xa = A.x;
 	float xb = B.x;
 	float xc = C.x;
-
+	srand(time(NULL));
 
 	register int32_t nMinx = (int32_t)min(min(xa, xb), xc);
 	register int32_t nMaxx = (int32_t)max(max(xa, xb), xc);
@@ -67,6 +73,8 @@ void Rasterize(const MVector4& A, const MVector4& B, const MVector4& C, GL::SRGB
 				((xc - xa) * (y - yc) - (yc - ya) * (x - xc) > 0)
 				)
 			{
+
+				pColour = Lerp(GL::SRGB(1.0,0.f, 0.3f), GL::SRGB(0.f, 0.5f, 0.f), (float)y / GL::nWindowHeight );
 				GL::pFrameBuffer[3 * (y * GL::nWindowWidth + x) + 0] = pColour.r;
 				GL::pFrameBuffer[3 * (y * GL::nWindowWidth + x) + 1] = pColour.g;
 				GL::pFrameBuffer[3 * (y * GL::nWindowWidth + x) + 2] = pColour.b;

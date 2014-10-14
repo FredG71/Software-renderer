@@ -43,10 +43,39 @@ namespace GL{
 		SRGB(float __r, float __g, float __b)
 			: r(__r), g(__g), b(__b)
 		{}
+		SRGB& operator* (float f)
+		{
+			r = r * f;
+			g = g * f;
+			b = b * f;
+			return *this;
+		}
+
+		SRGB& operator*(SRGB& inColor)
+		{
+			r = r * inColor.r;
+			g = g * inColor.g;
+			b = b * inColor.b;
+			return *this;
+		}
+		 SRGB& operator - ( SRGB& inColor)
+		{
+			r = r - inColor.r;
+			g = g - inColor.g;
+			b = b - inColor.b;
+			return *this;
+		}
+
+		 SRGB& operator + (SRGB& inColor)
+		 {
+			 r = r + inColor.r;
+			 g = g + inColor.g;
+			 b = b + inColor.b;
+			 return *this;
+		 }
 	};
 };
 
 void Draw(int32_t x, int32_t y, GL::SRGB& pColor, float* pFrameBuffer);
 void Render();
 void SetPolygonMode(EPolygonMode PolygonMode);
-void ViewportTransform(int32_t x, int32_t y, int32_t nWidth, int32_t nHeight, MVector4& NDC);

@@ -5,11 +5,8 @@
 *	Author: Frederic Garnier.
 *	Language: C++
 *	Created: 9/10/2014
-*	Modified: 11/10/2014
+*	Modified: 14/10/2014
 *
-*
-*	Currently supports drawing lines, among other things see debugCheckerBoard(), no support for linear interlation, 2 dimensional vectors
-*	3 dimensional vectors etc, this should work on other platforms, however it hasn't been tested
 *	
 *	Libraries: OpenGL, Freeglut.
 *	Compiler: Microsoft Visual C++ Compiler Nov 2013 CTP
@@ -18,11 +15,11 @@
 *
 *
 *	BUGS:
-*	Rotation around the Z axis can cause issues, which will be resolved when going to 3D, stretching the window can cause a crash, due to going out of the
-*	framebuffer's bounds etc.s
+*	Multiplying matrix by identify matrix can return a zero matrix, concatenating transforms can cause this issue too. Stretching screen causes issues but that should be
+*	solved in the future, matrix functions may have computations errors, need to test those, however the output seems correct.
 */
-int32_t GL::nWindowHeight = 512;
-int32_t GL::nWindowWidth = 512;
+int32_t GL::nWindowHeight = 768;
+int32_t GL::nWindowWidth = 1024;
 uint32_t GL::nSize = GL::nWindowWidth * GL::nWindowHeight;
 float* GL::pFrameBuffer;
 uint32_t GL::nOldSize = GL::nSize;
@@ -54,7 +51,8 @@ void Render()
 	// Adjust array size as window is resized
 	GL::nSize = GL::nWindowWidth * GL::nWindowHeight;
 	GL::pFrameBuffer = new float[GL::nSize * 3];
-	DrawPrimitive(VertexBuffer, GL::SRGB(1, 1, 0), EPrimitive::EPrimitive_Type_Triangle);
+	DrawPrimitive(VertexBuffer, GL::SRGB(1, 0, 1), EPrimitive::EPrimitive_Type_Triangle);
+	//debugCheckerBoard();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDrawPixels(GL::nWindowWidth, GL::nWindowHeight, GL_RGB, GL_FLOAT, GL::pFrameBuffer);
 	glutSwapBuffers();
@@ -72,18 +70,23 @@ void OnReshape(int32_t nWidth, int32_t nHeight)
 	GL::nWindowWidth = nWidth;
 }
 
+
+
 void InitBuffer()
 {
-	VertexBuffer.SetAttribute(-1, -1, 0, 0, 0);
-	VertexBuffer.SetAttribute(0, 1, 0, 0, 1);
-	VertexBuffer.SetAttribute(1, -1, 0, 0, 2);
-	MMatrix4x4 pScaleMatrix = ScaleMatrix(pScaleMatrix, 0.5, 0.5, 0.5);
-	MMatrix4x4 pRotationMatrix = RotationMatrixY(pRotationMatrix, 1.1);
-	MMatrix4x4 MatrixProduct = pScaleMatrix * pRotationMatrix;
-	for (int nIndex = 0; nIndex < VertexBuffer.nNumVectors; nIndex++)
-	{
-		VertexBuffer.pBufferAttribute[nIndex] = VertexBuffer.pBufferAttribute[nIndex] * MatrixProduct;
-	}
+	VertexBuffer.SetAttribute( 0.f, 0.25f, 0.f, 1.f, 0 );
+	VertexBuffer.SetAttribute( 0.25f, -0.25f, 0.f, 1.f, 1);
+	VertexBuffer.SetAttribute( -0.25, -0.25, 0.f, 1.f, 2 );
+
+	MMatrix4x4 Projection = Perspective(45.f, (float)GL::nWindowWidth / GL::nWindowHeight, 1.f, 100.f);
+	MMatrix4x4 View = LookAt(MVector4(2.f, 2.f, -1.f, 0.f), MVector4(0.f, 0.f, 0.f, 0.f), MVector4( 0.f, 1.f, 0.f, 0.f ));
+
+	To3D(0, 0, GL::nWindowWidth, GL::nWindowHeight, View, Projection, VertexBuffer.pBufferAttribute);
+	MMatrix4x4 Rotation = RotationMatrixZ(Rotation, 0.3);
+
+
+	for ( int i = 0; i < 3; i++ )
+		VertexBuffer.pBufferAttribute[i] = Rotation * VertexBuffer.pBufferAttribute[i];
 }
 
 int main(int argc, char** argv)
