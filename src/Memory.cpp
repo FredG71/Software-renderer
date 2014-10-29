@@ -1,4 +1,5 @@
 #include "Memory.h"
+#include "Math.h"
 
 /*@Note: Allocates a block of memory from the pool
 @param nSize: Size in bytes of the memory required
@@ -124,13 +125,10 @@ template<typename Type> void* GMalloc<Type>::Alloca(uint32_t nSize)
 {
 	int32_t nErrorCode = 0;
 	static void* pData = NULL;
-	__try
-	{
+	__try{
 		if (nSize > 0 && nSize < 1024)
 			pData = _alloca(nSize);
-	}
-	__except (GetExceptionCode() == STATUS_STACK_OVERFLOW )
-	{
+	}__except (GetExceptionCode() == STATUS_STACK_OVERFLOW ){
 			nErrorCode = _resetstkoflw();
 			assertf(!nErrorCode, "Stack couldn't be reset.");
 	};
